@@ -27,3 +27,6 @@ $(APP).tab.c: $(APP).y
 
 $(APP).tab.h: $(APP).y
 	bison -d $(APP).y
+
+clean:
+	rm -f *.o ucode core ucode.tab.* lex.yy.c
