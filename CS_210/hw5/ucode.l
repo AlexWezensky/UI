@@ -1,129 +1,164 @@
 %{
-/*Alex Wezensky
-CS 210
-Dr. Jeffery
-11/18/15
-HW 5 Context Free Grammars and Bison*/
-#define YYDEBUG 1
-#include <stdio.h>
-#include <stdlib.h>
-void yyerror(char *s);
-extern char *yyfilename;
-extern char *yytext;
-extern int yylineno;
-//int yydebug = 1;
+#define PosixFns
+#include "ucode.tab.h"
+int yywrap();
+int lineno = 1;
 %}
 
-%token CONTROL_L CAROT_L Op_Version VERSIONSTAMP Op_Uid UCODESTAMP 
-%token IDENTIFIER COMMA DECCONST Op_Impl Op_Local Op_Link FILENAME Op_Global OCTCONST
-%token Op_Con Op_Declend Op_Asgn Op_Bang Op_Cat Op_Compl Op_Diff Op_Div Op_Eqv Op_Inter
-%token Op_Lconcat Op_Lexeq Op_Lexge Op_Lexgt Op_Lexle Op_Lexlt Op_Lexne
-%token Op_Minus Op_Mod Op_Mult Op_Neg Op_Negv Op_Nonull Op_Nonnull
-%token Op_Null Op_Number Op_Numeq Op_Numge Op_Numgt Op_Numle Op_Numlt
-%token Op_Numne Op_Plus Op_Power Op_Random Op_Rasgn Op_Rcv Op_Rcvbk
-%token Op_Refresh Op_Rswap Op_Sect Op_Snd Op_Sndbk Op_Size Op_Subsc
-%token Op_Swap Op_Tabmat Op_Toby Op_Unions Op_Bscan Op_Ccase
-%token Op_Coact Op_Cofail Op_Coret Op_Dup Op_Efail Op_Eret Op_Escan
-%token Op_Esusp Op_Limit Op_Lsusp Op_Pfail Op_Pnull Op_Pop Op_Pret
-%token Op_Psusp Op_Push1 Op_Pushn1 Op_Sdup Op_Unmark Op_Var Op_Mark0 
-%token ANY LABEL Op_Error Op_Proc Op_Record Op_End
-%token Op_Cset Op_Int Op_Invoke Op_Line Op_Llist Op_Real Op_Str     
-%token Op_Chfail Op_Create Op_EInit Op_Goto Op_Init Op_Mark
-%token Op_Field Op_Keywd Op_Synt
-%token REALCONST Op_Neqv Op_RcvBk Op_SndBk Op_Value Op_Arg Op_Static
-%token Op_Quit Op_FQuit Op_Tally Op_Apply Op_Acset Op_Areal Op_Astr Op_Aglobal
-%token Op_Astatic Op_Agoto Op_Amark Op_Noop Op_Colm Op_Filen Op_Trace Op_Lab
-%token Op_Invocable Op_Copyd Op_Trapret Op_Trapfail
+%%
+
+(\x0C)                            {return CONTROL_L; }
+(\^L)                             {return CAROT_L; }
+"version"                         {return Op_Version; }
+\n                                {lineno++; }
+(U[0-9]+\.[0-9]+\.00)             {return VERSIONSTAMP; }
+([a-zA-Z]+\.u1\-[0-9]+\-[0-9]+)   {return UCODESTAMP; }
+(L[0-9]+)                         {return LABEL; }
+,                                 {return COMMA; }
+([1-9][0-9]*)                     {return DECCONST; }
+(0[0-7]*)                         {return OCTCONST; }
+([0-9]*\.[0-9]+)                  {return REALCONST; }
+([a-zA-Z0-9]+\.[a-zA-Z]{1,3})     {return FILENAME; }
+"any"          {return ANY; }
+"case"         {return ANY; }
+"endcase"      {return ANY; }
+"if"           {return ANY; }
+"endif"        {return ANY; }
+"ifelse"       {return ANY; }
+"endifelse"    {return ANY; }
+"while"        {return ANY; }
+"endwhile"     {return ANY; }
+"every"        {return ANY; }
+"endevery"     {return ANY; }
+"until"        {return ANY; }
+"enduntil"     {return ANY; }
+"repeat"       {return ANY; }
+"endrepeat"    {return ANY; }
+"suspend"      {return ANY; }
+"endsuspend"   {return ANY; }
+"asgn"    {return Op_Asgn; }
+"bang"    {return Op_Bang; }
+"cat"     {return Op_Cat; }
+"compl"   {return Op_Compl; }
+"diff"    {return Op_Diff; }
+"div"     {return Op_Div; }
+"eqv"     {return Op_Eqv; }
+"inter"   {return Op_Inter; }
+"lconcat" {return Op_Lconcat; }
+"lexeq"   {return Op_Lexeq; }
+"lexge"   {return Op_Lexge; }
+"lexgt"   {return Op_Lexgt; }
+"lexle"   {return Op_Lexle; }
+"lexlt"   {return Op_Lexlt; }
+"lexne"   {return Op_Lexne; }
+"minus"   {return Op_Minus; }
+"mod"     {return Op_Mod; }
+"mult"    {return Op_Mult; }
+"neg"     {return Op_Neg; }
+"neqv"    {return Op_Neqv; }
+"nonnull" {return Op_Nonnull; }
+"null"    {return Op_Null; }
+"number"  {return Op_Number; }
+"numeq"   {return Op_Numeq; }
+"numge"   {return Op_Numge; }
+"numgt"   {return Op_Numgt; }
+"numle"   {return Op_Numle; }
+"numlt"   {return Op_Numlt; }
+"numne"   {return Op_Numne; }
+"plus"    {return Op_Plus; }
+"power"   {return Op_Power; }
+"random"  {return Op_Random; }
+"rasgn"   {return Op_Rasgn; }
+"rcv"     {return Op_Rcv; }
+"rcvbk"   {return Op_RcvBk; }
+"refresh" {return Op_Refresh; }
+"rswap"   {return Op_Rswap; }
+"sect"    {return Op_Sect; }
+"snd"     {return Op_Snd; }
+"sndbk"   {return Op_SndBk; }
+"size"    {return Op_Size; }
+"subsc"   {return Op_Subsc; }
+"swap"    {return Op_Swap; }
+"tabmat"  {return Op_Tabmat; }
+"toby"    {return Op_Toby; }
+"unions"  {return Op_Unions; }
+"value"   {return Op_Value; }
+"bscan"   {return Op_Bscan; }
+"ccase"   {return Op_Ccase; }
+"chfail"  {return Op_Chfail; }
+"coact"   {return Op_Coact; }
+"cofail"  {return Op_Cofail; }
+"coret"   {return Op_Coret; }
+"create"  {return Op_Create; }
+"cset"    {return Op_Cset; }
+"dup"     {return Op_Dup; }
+"efail"   {return Op_Efail; }
+"einit"   {return Op_EInit; }
+"eret"    {return Op_Eret; }
+"escan"   {return Op_Escan; }
+"esusp"   {return Op_Esusp; }
+"field"   {return Op_Field; }
+"goto"    {return Op_Goto; }
+"init"    {return Op_Init; }
+"int"     {return Op_Int; }
+"invoke"  {return Op_Invoke; }
+"keywd"   {return Op_Keywd; }
+"limit"   {return Op_Limit; }
+"line"    {return Op_Line; }
+"llist"   {return Op_Llist; }
+"lsusp"   {return Op_Lsusp; }
+"mark"    {return Op_Mark; }
+"pfail"   {return Op_Pfail; }
+"pnull"   {return Op_Pnull; }
+"pop"     {return Op_Pop; }
+"pret"    {return Op_Pret; }
+"psusp"   {return Op_Psusp; }
+"push1"   {return Op_Push1; }
+"pushn1"  {return Op_Pushn1; }
+"real"    {return Op_Real; }
+"sdup"    {return Op_Sdup; }
+"str"     {return Op_Str; }
+"unmark"  {return Op_Unmark; }
+"var"     {return Op_Var; }
+"arg"     {return Op_Arg; }
+"static"  {return Op_Static; }
+"local"   {return Op_Local; }
+"global"  {return Op_Global; }
+"mark0"   {return Op_Mark0; }
+"quit"    {return Op_Quit; }
+"fquit"   {return Op_FQuit; }
+"tally"   {return Op_Tally; }
+"apply"   {return Op_Apply; }
+"acset"   {return Op_Acset; }
+"areal"   {return Op_Areal; }
+"astr"    {return Op_Astr; }
+"aglobal" {return Op_Aglobal; }
+"astatic" {return Op_Astatic; }
+"agoto"   {return Op_Agoto; }
+"amark"   {return Op_Amark; }
+"noop"    {return Op_Noop; }
+"colm"    {return Op_Colm; }
+"proc"    {return Op_Proc; }
+"declend" {return Op_Declend; }
+"end"     {return Op_End; }
+"link"    {return Op_Link; }
+"con"     {return Op_Con; }
+"filen"   {return Op_Filen; }
+"record"  {return Op_Record; }
+"impl"    {return Op_Impl; }
+"error"   {return Op_Error; }
+"trace"   {return Op_Trace; }
+"lab"     {return Op_Lab; }
+"invocable"  {return Op_Invocable; }
+"copyd"   {return Op_Copyd; }
+"trapret" {return Op_Trapret; }
+"trapfail" {return Op_Trapfail; }
+"synt"    {return Op_Synt; }
+"uid"     {return Op_Uid; }
+([a-zA-Z_]|[a-zA-Z_][a-zA-Z0-9_]+)        {return IDENTIFIER; }
+([ \t]*)
+.         {printf("lex error foo.u:5 bad token at %s on line %d\n", yytext, lineno); }
 
 %%
 
-ucode: u2 CONTROL_L u1
-     | u2 CAROT_L u1;
-
-u2: version ucodeline records implline links globalline;
-
-version: Op_Version VERSIONSTAMP;
-ucodeline: Op_Uid UCODESTAMP;
-records: | record records;
-record: Op_Record IDENTIFIER COMMA DECCONST fields;
-fields: field | field fields;
-field: DECCONST COMMA IDENTIFIER
-     | OCTCONST COMMA IDENTIFIER;
-implline: Op_Impl Op_Local
-        | Op_Impl Op_Error;
-links: | link links;
-link: Op_Link FILENAME;
-globalline: Op_Global OCTCONST globals
-          | Op_Global DECCONST globals;
-globals: | OCTCONST COMMA OCTCONST COMMA IDENTIFIER COMMA OCTCONST globals
-         | OCTCONST COMMA OCTCONST COMMA IDENTIFIER COMMA DECCONST globals
-         | DECCONST COMMA OCTCONST COMMA IDENTIFIER COMMA OCTCONST globals
-         | DECCONST COMMA OCTCONST COMMA IDENTIFIER COMMA DECCONST globals;
-
-u1: procedures;
-procedures: | procedure procedures;
-procedure: procs localdecs Op_Declend instructions Op_End;
-
-procs: Op_Proc IDENTIFIER;
-
-localdecs: | localdec localdecs;
-localdec: locals | cons;
-locals: | local locals;
-local: Op_Local OCTCONST COMMA OCTCONST COMMA IDENTIFIER
-     | Op_Local DECCONST COMMA OCTCONST COMMA IDENTIFIER
-     | Op_Local OCTCONST COMMA OCTCONST COMMA LABEL
-     | Op_Local DECCONST COMMA OCTCONST COMMA LABEL
-     | Op_Local OCTCONST COMMA OCTCONST COMMA Op_Arg
-     | Op_Local DECCONST COMMA OCTCONST COMMA Op_Arg
-     | Op_Local OCTCONST COMMA OCTCONST COMMA Op_Proc
-     | Op_Local DECCONST COMMA OCTCONST COMMA Op_Proc;
-
-cons: | con cons;
-con: Op_Con OCTCONST COMMA OCTCONST COMMA confields
-   | Op_Con DECCONST COMMA OCTCONST COMMA confields;
-confields: | confield confields;
-confield: OCTCONST
-        | OCTCONST COMMA confields
-        | DECCONST
-        | DECCONST COMMA confields;
-
-instructions: | instruction instructions;
-instruction: noop | intop | labelop | syntdir;
-
-noop: Op_Asgn | Op_Bang | Op_Cat | Op_Compl | Op_Diff | Op_Div | Op_Eqv | Op_Inter
-    | Op_Lconcat | Op_Lexeq | Op_Lexge | Op_Lexgt | Op_Lexle | Op_Lexlt | Op_Lexne
-    | Op_Minus | Op_Mod | Op_Mult | Op_Neg | Op_Negv | Op_Nonull | Op_Nonnull
-    | Op_Null | Op_Number | Op_Numeq | Op_Numge | Op_Numgt | Op_Numle | Op_Numlt
-    | Op_Numne | Op_Plus | Op_Power | Op_Random | Op_Rasgn | Op_Rcv | Op_Rcvbk
-    | Op_Refresh | Op_Rswap | Op_Sect | Op_Snd | Op_Sndbk | Op_Size | Op_Subsc
-    | Op_Swap | Op_Tabmat | Op_Toby | Op_Unions | Op_Bscan | Op_Ccase
-    | Op_Coact | Op_Cofail | Op_Coret | Op_Dup | Op_Efail | Op_Eret | Op_Escan
-    | Op_Esusp | Op_Limit | Op_Lsusp | Op_Pfail | Op_Pnull | Op_Pop | Op_Pret
-    | Op_Psusp | Op_Push1 | Op_Pushn1 | Op_Sdup | Op_Unmark | Op_Mark0 | Op_Value
-    | Op_Neqv;
-
-intop: Op_Cset OCTCONST | Op_Cset DECCONST
-     | Op_Int OCTCONST | Op_Int DECCONST
-     | Op_Invoke OCTCONST | Op_Invoke DECCONST
-     | Op_Line OCTCONST | Op_Line DECCONST
-     | Op_Llist OCTCONST | Op_Llist DECCONST
-     | Op_Real OCTCONST | Op_Real DECCONST
-     | Op_Str OCTCONST | Op_Str DECCONST
-     | Op_Colm DECCONST
-     | Op_Var OCTCONST | Op_Var DECCONST;
-     
-labelop: Op_Chfail LABEL | Op_Create LABEL | Op_EInit LABEL | Op_Goto LABEL | Op_Init LABEL
-       | Op_Lsusp LABEL | Op_Mark LABEL | Op_Lab LABEL;
-
-syntdir: Op_Field IDENTIFIER | Op_Keywd IDENTIFIER | Op_Synt ANY | Op_Filen FILENAME
-       | Op_Proc IDENTIFIER;
-
-%%
-
-extern FILE *yyin;
-
-void yyerror(char *s)
-{
-  fprintf(stderr, "%s: %s at token '%s'\n",
-	  s, yyfilename, yytext);
-}
+int yywrap()  {return 1;}
